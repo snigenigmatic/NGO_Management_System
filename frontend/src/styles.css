@@ -1,0 +1,60 @@
+:root{
+	--bg: #f6f7fb;
+	--surface: #ffffff;
+	--muted: #6b7280;
+	--accent: #0ea5a4; /* teal-ish */
+	--accent-600: #089b99;
+	--border: #e6e9ee;
+	--text: #1f2937;
+}
+
+*{box-sizing:border-box}
+body{
+	font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+	background:var(--bg);
+	color:var(--text);
+	margin:0;
+}
+
+h1{color:var(--text); margin:0 0 12px 0}
+
+/* basic page container */
+.app-root{max-width:1200px; margin:18px auto; padding:20px}
+
+/* nav buttons */
+button{
+	background:transparent; border:1px solid var(--border); padding:8px 12px; border-radius:6px; cursor:pointer; color:var(--text);
+}
+button:hover{background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent)}
+button:active{transform:translateY(1px)}
+
+.nav button{background:var(--surface); border:1px solid var(--border)}
+.nav button.active{background:linear-gradient(180deg,var(--accent),var(--accent-600)); color:white; border-color:transparent}
+
+/* tables */
+.table-wrap{overflow:auto; background:transparent}
+table{width:100%; border-collapse:collapse; background:var(--surface); box-shadow:0 1px 2px rgba(16,24,40,0.04)}
+thead th{background:linear-gradient(180deg,#f3f6f9,#eef2f6); text-align:left; padding:12px; font-size:14px; color:var(--muted)}
+tbody td{padding:12px; border-top:1px solid var(--border); font-size:14px}
+tbody tr:nth-child(even){background:rgba(0,0,0,0.01)}
+tbody tr:hover{background:rgba(14,165,164,0.04)}
+
+.small{font-size:13px; color:var(--muted)}
+
+/* forms */
+input[type="text"], input[type="date"], input[type="number"], textarea{
+	padding:8px 10px; border:1px solid var(--border); border-radius:6px; width:100%;
+}
+form button{background:var(--accent); color:white; border:none; padding:10px 14px; border-radius:6px}
+
+/* responsive tweaks */
+@media (max-width:720px){
+	.app-root{padding:12px}
+	thead th, tbody td{padding:8px}
+	form{grid-template-columns:1fr !important}
+}
+
+/* helper layout classes used by App.jsx */
+.page-title{display:flex; align-items:center; justify-content:space-between}
+.controls{display:flex; gap:8px}
+
