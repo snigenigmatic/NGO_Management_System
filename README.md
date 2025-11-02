@@ -14,7 +14,10 @@ SOURCE /absolute/path/to/tests.sql;
 ```
 Setup
 ```bash
-uv venv; .\.venv\bin\activate
+uv venv; source ./.venv/bin/activate (Linux/macOS)
+'''or'''
+.venv/Scripts/activate (Windows)
+------------------------------------------------------
 cd api
 uv pip install -r requirements.txt
 copy .env.example .env  # then edit DB_USER/DB_PASSWORD if needed
