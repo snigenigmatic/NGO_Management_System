@@ -27,7 +27,7 @@ Run
 ```bash
 uv run uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
-Open http://localhost:5000 and use the navbar. The pages map to rubric items below.
+Open http://localhost:5000 and use the navbar. 
 
 Run the frontend:
 ```bash
