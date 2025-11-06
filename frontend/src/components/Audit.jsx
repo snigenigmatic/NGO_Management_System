@@ -4,7 +4,8 @@ import axios from 'axios'
 export default function Audit(){
   const [rows, setRows] = useState([])
   useEffect(()=>{
-    axios.get('http://127.0.0.1:8000/audit').then(r=> setRows(r.data))
+    // Use demo endpoint which falls back to synthesized entries when audit table is empty
+    axios.get('http://127.0.0.1:8000/audit/demo').then(r=> setRows(r.data))
   },[])
 
   return (

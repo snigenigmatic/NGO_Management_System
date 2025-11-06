@@ -54,7 +54,7 @@ export default function Events(){
 
       <div className="table-wrap">
       <table>
-        <thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Venue</th><th>Venue Status</th></tr></thead>
+  <thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Venue</th><th>Venue Status</th><th>Sponsor</th><th>Sponsor POC</th><th>Sponsored Amount</th><th>Sponsors</th></tr></thead>
         <tbody>
           {rows.map(r=> (
             <tr key={r.Event_ID}>
@@ -63,6 +63,10 @@ export default function Events(){
               <td>{r.Location}</td>
               <td>{r.Venue_ID}</td>
               <td>{r.venue_status}</td>
+              <td>{r.sponsor_name || '-'}</td>
+              <td>{r.sponsor_person_name || '-'}</td>
+              <td>{r.sponsored_amount != null ? r.sponsored_amount : '-'}</td>
+              <td style={{whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:240}}>{r.sponsors_list || '-'}</td>
             </tr>
           ))}
         </tbody>
