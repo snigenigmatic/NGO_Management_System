@@ -22,8 +22,8 @@ export default function Summary(){
             <tr key={r.NGO_ID}>
               <td>{r.NGO_ID}</td>
               <td>{r.NGO_Name}</td>
-              <td>{r.total_amount}</td>
-              <td>{r.donation_count}</td>
+              <td>{r.total_donations}</td>
+              <td>{r.donor_count}</td>
             </tr>
           ))}
         </tbody>

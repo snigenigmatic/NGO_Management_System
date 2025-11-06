@@ -149,9 +149,8 @@ def query_join():
 
 @app.get("/queries/aggregate")
 def query_aggregate():
-    return fetchall(
-        'SELECT DATE_FORMAT(Donation_date, "%Y-%m") AS year_month, NGO_ID, SUM(Amount) AS total_amount, COUNT(*) AS donation_count FROM Donation GROUP BY NGO_ID, DATE_FORMAT(Donation_date, "%Y-%m")'
-    )
+    # Use the existing view, which is correct and matches the frontend
+    return fetchall("SELECT * FROM vw_monthly_donations")
 
 
 @app.get("/health")

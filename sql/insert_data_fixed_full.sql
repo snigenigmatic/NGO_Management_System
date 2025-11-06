@@ -1,5 +1,3 @@
--- Repaired full insert script (clean copy of original `insert_data.sql`)
--- Safe to run on MySQL 8.0.43. Assumes `ddl_fixed.sql` or original `ddl.sql` has been applied.
 USE ngo_management;
 SET FOREIGN_KEY_CHECKS = 0;
 -- Insert data into NGO table
@@ -497,4 +495,214 @@ VALUES (
         4,
         4
     );
+SET FOREIGN_KEY_CHECKS = 1;
+-- Insert data for Sponsor
+INSERT INTO Sponsor (
+        Sponsor_ID,
+        Name,
+        Contact,
+        Email,
+        Focus_area,
+        Description
+    )
+VALUES (
+        1,
+        'TechAid Pvt Ltd',
+        '+91-9988776655',
+        'contact@techaid.com',
+        'Education',
+        'Supporting digital literacy programs'
+    ),
+    (
+        2,
+        'GreenFuture Corp',
+        '+91-8877665544',
+        'info@greenfuture.org',
+        'Environment',
+        'Focuses on sustainability and tree planting'
+    ),
+    (
+        3,
+        'HealthBridge Ltd',
+        '+91-7766554433',
+        'support@healthbridge.com',
+        'Healthcare',
+        'Funds community health initiatives'
+    ),
+    (
+        4,
+        'ChildSmile Foundation',
+        '+91-6655443322',
+        'hello@childsmile.org',
+        'Child Welfare',
+        'Supports child welfare and nutrition drives'
+    ),
+    (
+        5,
+        'WomenRise Pvt Ltd',
+        '+91-5544332211',
+        'reach@womenrise.in',
+        'Women Empowerment',
+        'Funds seminars and workshops for women'
+    );
+-- Insert data for Sponsor_Person
+INSERT INTO Sponsor_Person (
+        Sponsor_Person_ID,
+        Sponsor_ID,
+        Name,
+        Email,
+        Phone,
+        Role
+    )
+VALUES (
+        1,
+        1,
+        'Ramesh Iyer',
+        'ramesh.iyer@techaid.com',
+        '+91-9000000001',
+        'CSR Head'
+    ),
+    (
+        2,
+        2,
+        'Anita George',
+        'anita.george@greenfuture.org',
+        '+91-9000000002',
+        'Project Manager'
+    ),
+    (
+        3,
+        3,
+        'Vivek Sharma',
+        'vivek.sharma@healthbridge.com',
+        '+91-9000000003',
+        'Coordinator'
+    ),
+    (
+        4,
+        4,
+        'Sneha Kapoor',
+        'sneha.kapoor@childsmile.org',
+        '+91-9000000004',
+        'PR Manager'
+    ),
+    (
+        5,
+        5,
+        'Rahul Mehta',
+        'rahul.mehta@womenrise.in',
+        '+91-9000000005',
+        'Outreach Officer'
+    );
+-- Insert data for Sponsor_Interest
+INSERT INTO Sponsor_Interest (Sponsor_ID, interest)
+VALUES (1, 'STEM Education'),
+    (1, 'Teacher Training'),
+    (2, 'Reforestation'),
+    (2, 'Plastic Reduction'),
+    (3, 'Rural Clinics'),
+    (3, 'Health Awareness'),
+    (4, 'Child Nutrition'),
+    (4, 'School Support'),
+    (5, 'Entrepreneurship'),
+    (5, 'Women Leadership');
+-- Insert data for Event_Vendor
+INSERT INTO Event_Vendor (
+        Event_ID,
+        Vendor_ID,
+        Service_Details,
+        Cost,
+        Contract_Date
+    )
+VALUES (
+        1,
+        1,
+        'Catering for 200 attendees',
+        15000.00,
+        '2024-11-10'
+    ),
+    (
+        1,
+        6,
+        'Photography and video coverage',
+        8000.00,
+        '2024-11-11'
+    ),
+    (
+        2,
+        2,
+        'Audio and lighting for park setup',
+        12000.00,
+        '2024-11-15'
+    ),
+    (
+        3,
+        3,
+        'Medical equipment rental',
+        25000.00,
+        '2024-11-25'
+    ),
+    (
+        4,
+        4,
+        'Event decoration and banners',
+        10000.00,
+        '2024-11-10'
+    ),
+    (
+        5,
+        5,
+        'Transport for speakers and guests',
+        7000.00,
+        '2024-12-05'
+    ),
+    (
+        7,
+        7,
+        'Security arrangements',
+        9000.00,
+        '2024-12-02'
+    );
+-- Insert data for Event_task
+INSERT INTO Event_task (
+        Task_ID,
+        Event_ID,
+        Vol_ID,
+        Task_description,
+        Status
+    )
+VALUES (1, 1, 1, 'Manage registration desk', 'Completed'),
+    (2, 1, 2, 'Capture event photos', 'Completed'),
+    (
+        3,
+        2,
+        7,
+        'Coordinate volunteer groups',
+        'Pending'
+    ),
+    (4, 3, 3, 'Assist doctors during camp', 'Ongoing'),
+    (
+        5,
+        4,
+        5,
+        'Organize games for children',
+        'Completed'
+    ),
+    (6, 5, 4, 'Host panel discussion', 'Pending'),
+    (7, 7, 8, 'Coordinate cleanup crew', 'Ongoing');
+-- Insert data for Volunteer_involvement
+INSERT INTO Volunteer_involvement (
+        Involvement_ID,
+        Volunteer_ID,
+        Event_ID,
+        Hours_contributed,
+        Feedback
+    )
+VALUES (1, 1, 1, 6, 'Very engaging experience'),
+    (2, 2, 1, 5, 'Smooth event execution'),
+    (3, 3, 3, 8, 'Good teamwork with medical staff'),
+    (4, 5, 4, 7, 'Children enjoyed the activities'),
+    (5, 4, 5, 4, 'Well-organized seminar'),
+    (6, 8, 7, 5, 'Cleanup drive was successful'),
+    (7, 7, 2, 3, 'Could have used more volunteers');
 SET FOREIGN_KEY_CHECKS = 1;

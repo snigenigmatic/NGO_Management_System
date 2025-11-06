@@ -1,9 +1,3 @@
--- Improved DDL for NGO Management System (Review-3 ready)
--- Safe, minimal changes from original `ddl.sql`:
---  - Add AUTO_INCREMENT to single-column primary keys
---  - Specify ENGINE=InnoDB and CHARSET
---  - Add indexes on foreign key columns
---  - Keep original constraints and referential actions
 CREATE DATABASE IF NOT EXISTS ngo_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE ngo_management;
 -- NGO table
@@ -37,6 +31,26 @@ CREATE TABLE IF NOT EXISTS Venue (
     Type VARCHAR(255) NOT NULL,
     Status VARCHAR(255) DEFAULT 'Available'
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+-- Sponsor table
+CREATE TABLE IF NOT EXISTS Sponsor (
+    Sponsor_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(255) NOT NULL,
+    Contact VARCHAR(255),
+    Email VARCHAR(255),
+    Focus_area VARCHAR(255),
+    Description TEXT
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+-- Sponsor_Person table
+CREATE TABLE IF NOT EXISTS Sponsor_Person (
+    Sponsor_Person_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Sponsor_ID INT,
+    Name VARCHAR(255) NOT NULL,
+    Email VARCHAR(255),
+    Phone VARCHAR(255),
+    Role VARCHAR(255),
+    CONSTRAINT fk_sp_person_sponsor FOREIGN KEY (Sponsor_ID) REFERENCES Sponsor (Sponsor_ID) ON DELETE
+    SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 -- Event table
 CREATE TABLE IF NOT EXISTS Event (
     Event_ID INT PRIMARY KEY AUTO_INCREMENT,
@@ -46,14 +60,27 @@ CREATE TABLE IF NOT EXISTS Event (
     Location VARCHAR(255),
     NGO_ID INT NOT NULL,
     Venue_ID INT,
+    Sponsor_Person_ID INT NULL,
+    -- Added for sponsor tracking
     CHECK (
         End_date IS NULL
         OR Start_date <= End_date
     ),
     INDEX idx_event_ngo (NGO_ID),
-    INDEX idx_event_venue (Venue_ID)
+    INDEX idx_event_venue (Venue_ID),
+    INDEX idx_event_sponsor_person (Sponsor_Person_ID),
+    CONSTRAINT fk_event_sponsor_person FOREIGN KEY (Sponsor_Person_ID) REFERENCES Sponsor_Person (Sponsor_Person_ID) ON DELETE
+    SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
--- Event_task table (use surrogate PK Task_ID)
+-- Volunteer table
+CREATE TABLE IF NOT EXISTS Volunteer (
+    Vol_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    Phone VARCHAR(255),
+    Skills TEXT
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+-- Event_task table
 CREATE TABLE IF NOT EXISTS Event_task (
     Task_ID INT PRIMARY KEY AUTO_INCREMENT,
     Event_ID INT NOT NULL,
@@ -64,15 +91,7 @@ CREATE TABLE IF NOT EXISTS Event_task (
     INDEX idx_et_vol (Vol_ID),
     UNIQUE KEY ux_event_vol_task (Event_ID, Vol_ID, Task_description(100))
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
--- Volunteer table
-CREATE TABLE IF NOT EXISTS Volunteer (
-    Vol_ID INT PRIMARY KEY AUTO_INCREMENT,
-    Name VARCHAR(255) NOT NULL,
-    Email VARCHAR(255) NOT NULL UNIQUE,
-    Phone VARCHAR(255),
-    Skills TEXT
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
--- Volunteer_involvement table (use surrogate PK Involvement_ID)
+-- Volunteer_involvement table
 CREATE TABLE IF NOT EXISTS Volunteer_involvement (
     Involvement_ID INT PRIMARY KEY AUTO_INCREMENT,
     Volunteer_ID INT NOT NULL,
@@ -116,7 +135,16 @@ CREATE TABLE IF NOT EXISTS Event_Vendor (
     INDEX idx_ev_event (Event_ID),
     INDEX idx_ev_vendor (Vendor_ID)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
--- Add foreign key constraints
+-- Sponsor_Interest table
+CREATE TABLE IF NOT EXISTS Sponsor_Interest (
+    Sponsor_ID INT NOT NULL,
+    interest VARCHAR(255) NOT NULL,
+    PRIMARY KEY (Sponsor_ID, interest(150)),
+    INDEX idx_si_sponsor (Sponsor_ID),
+    INDEX idx_si_interest (interest(150)),
+    CONSTRAINT fk_si_sponsor FOREIGN KEY (Sponsor_ID) REFERENCES Sponsor (Sponsor_ID) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+-- Add Foreign Key Constraints
 ALTER TABLE Vendor
 ADD CONSTRAINT fk_vendor_ngo FOREIGN KEY (NGO_ID) REFERENCES NGO (NGO_ID) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE Event
@@ -137,6 +165,5 @@ SET NULL ON UPDATE CASCADE;
 ALTER TABLE Event_Vendor
 ADD CONSTRAINT fk_event_vendor_event FOREIGN KEY (Event_ID) REFERENCES Event (Event_ID) ON DELETE CASCADE ON UPDATE CASCADE,
     ADD CONSTRAINT fk_event_vendor_vendor FOREIGN KEY (Vendor_ID) REFERENCES Vendor (Vendor_ID) ON DELETE CASCADE ON UPDATE CASCADE;
--- Helpful comments:
--- - This `ddl_fixed.sql` is intentionally conservative (keeps original relational design)
--- - If you prefer the composite PKs to be restructured (e.g., simple surrogate PKs) we can change them later.
+ALTER TABLE Sponsor_Person
+ADD CONSTRAINT fk_sponsor_person_sponsor FOREIGN KEY (Sponsor_ID) REFERENCES Sponsor (Sponsor_ID) ON DELETE CASCADE ON UPDATE CASCADE;
