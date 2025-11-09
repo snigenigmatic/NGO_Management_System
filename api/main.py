@@ -76,10 +76,107 @@ def delete_vendor(vendor_id: int):
     return {"status": "ok"}
 
 
+# ============================================================================
+# NGO ENDPOINTS
+# ============================================================================
+
+class NGOIn(BaseModel):
+    name: str
+    registration: str
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    email: str
+    type: str
+
+
+@app.get("/ngos")
+def list_ngos():
+    """Get all NGOs."""
+    return fetchall(
+        "SELECT NGO_ID, NGO_Name, Registration_Number, Type, Email, Phone, Address FROM NGO ORDER BY NGO_ID DESC"
+    )
+
+
+@app.post("/ngos")
+def create_ngo(ngo: NGOIn):
+    """Create a new NGO."""
+    try:
+        execute(
+            """INSERT INTO NGO (NGO_Name, Registration_Number, Address, Phone, Email, Type) 
+               VALUES (%s, %s, %s, %s, %s, %s)""",
+            [ngo.name, ngo.registration, ngo.address, ngo.phone, ngo.email, ngo.type]
+        )
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.put("/ngos/{ngo_id}")
+def update_ngo(ngo_id: int, ngo: NGOIn):
+    """Update an existing NGO."""
+    try:
+        execute(
+            """UPDATE NGO 
+               SET NGO_Name = %s, Registration_Number = %s, Address = %s, 
+                   Phone = %s, Email = %s, Type = %s 
+               WHERE NGO_ID = %s""",
+            [ngo.name, ngo.registration, ngo.address, ngo.phone, ngo.email, ngo.type, ngo_id]
+        )
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/ngos/{ngo_id}")
+def delete_ngo(ngo_id: int):
+    """Delete an NGO."""
+    try:
+        execute("DELETE FROM NGO WHERE NGO_ID = %s", [ngo_id])
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/sponsors/recommend")
+def recommend_sponsors(q: str):
+    """Recommend sponsors for an event description or event_type string.
+    Calls the stored procedure `recommend_sponsors_for_event` which returns matching sponsors.
+    """
+    if not q or not q.strip():
+        raise HTTPException(status_code=400, detail="Query parameter 'q' is required")
+
+    try:
+        # Call the stored procedure which returns a result set
+        rows = fetchall("CALL recommend_sponsors_for_event(%s)", [q])
+        return rows
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Recommendation query failed: {e}")
+
+
+@app.get("/vendors/recommend")
+def recommend_vendors(q: str):
+    """Recommend vendors for an event description or event_type string.
+    Calls the stored procedure `recommend_vendors_for_event` which returns matching vendors.
+    """
+    if not q or not q.strip():
+        raise HTTPException(status_code=400, detail="Query parameter 'q' is required")
+
+    try:
+        rows = fetchall("CALL recommend_vendors_for_event(%s)", [q])
+        return rows
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Vendor recommendation failed: {e}")
+
+
 @app.get("/events")
 def list_events():
     return fetchall(
-        "SELECT e.Event_ID, e.Event_Type, e.Location, e.Venue_ID, v.Status AS venue_status FROM Event e LEFT JOIN Venue v ON e.Venue_ID = v.Venue_ID ORDER BY e.Event_ID DESC"
+        """SELECT e.Event_ID, e.Event_Type, e.Location, e.Venue_ID, 
+           v.Status AS venue_status, n.NGO_Name, n.Type AS ngo_type
+           FROM Event e 
+           LEFT JOIN Venue v ON e.Venue_ID = v.Venue_ID 
+           LEFT JOIN NGO n ON e.NGO_ID = n.NGO_ID
+           ORDER BY e.Event_ID DESC"""
     )
 
 
@@ -151,6 +248,91 @@ def query_join():
 def query_aggregate():
     # Use the existing view, which is correct and matches the frontend
     return fetchall("SELECT * FROM vw_monthly_donations")
+
+
+# ============================================================================
+# ANALYTICS ENDPOINTS
+# ============================================================================
+
+@app.get("/analytics/dashboard")
+def analytics_dashboard():
+    """Get overall dashboard KPIs and summary statistics."""
+    kpis = fetchall("SELECT * FROM vw_dashboard_kpis")
+    return {
+        "kpis": kpis[0] if kpis else {},
+        "recent_donations": fetchall(
+            "SELECT Donation_ID, Amount, Donation_date, Type FROM Donation ORDER BY Donation_date DESC LIMIT 10"
+        ),
+        "upcoming_events": fetchall(
+            "SELECT Event_ID, Event_Type, Start_date, Location FROM Event WHERE Start_date >= CURDATE() ORDER BY Start_date LIMIT 10"
+        ),
+    }
+
+
+@app.get("/analytics/sponsors")
+def analytics_sponsors():
+    """Get sponsor engagement analytics."""
+    return fetchall("SELECT * FROM vw_sponsor_engagement ORDER BY events_sponsored DESC")
+
+
+@app.get("/analytics/events")
+def analytics_events():
+    """Get event ROI and performance analytics."""
+    return fetchall("SELECT * FROM vw_event_roi ORDER BY net_impact DESC")
+
+
+@app.get("/analytics/vendors")
+def analytics_vendors():
+    """Get vendor performance and usage analytics."""
+    return fetchall("SELECT * FROM vw_vendor_performance ORDER BY total_revenue DESC")
+
+
+@app.get("/analytics/volunteers")
+def analytics_volunteers():
+    """Get volunteer impact and contribution analytics."""
+    return fetchall("SELECT * FROM vw_volunteer_impact ORDER BY total_hours DESC")
+
+
+@app.get("/analytics/donors")
+def analytics_donors():
+    """Get donor retention and lifetime value analytics."""
+    return fetchall("SELECT * FROM vw_donor_retention ORDER BY lifetime_value DESC")
+
+
+@app.get("/analytics/donations/by-type")
+def analytics_donations_by_type():
+    """Get donation breakdown by type (Cash, Online, Check, etc.)."""
+    return fetchall("SELECT * FROM vw_donation_by_type ORDER BY total_amount DESC")
+
+
+@app.get("/analytics/top-donors")
+def analytics_top_donors(limit: int = 10):
+    """Get top N donors by lifetime value (default 10)."""
+    try:
+        rows = fetchall("CALL get_top_donors(%s)", [limit])
+        return rows
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get top donors: {e}")
+
+
+@app.get("/analytics/ngo/{ngo_id}/events")
+def analytics_ngo_events(ngo_id: int):
+    """Get event performance for a specific NGO."""
+    try:
+        rows = fetchall("CALL get_ngo_event_performance(%s)", [ngo_id])
+        return rows
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get NGO event performance: {e}")
+
+
+@app.get("/analytics/vendor-rankings")
+def analytics_vendor_rankings(service_type: str = None):
+    """Get vendor rankings, optionally filtered by service type."""
+    try:
+        rows = fetchall("CALL get_vendor_rankings(%s)", [service_type])
+        return rows
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get vendor rankings: {e}")
 
 
 @app.get("/health")
