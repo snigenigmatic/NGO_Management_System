@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { currency } from '../utils/format'
 
 export default function Queries(){
   const [tab, setTab] = useState('nested')
@@ -20,6 +21,15 @@ export default function Queries(){
     aggregate: ['year_month','NGO_ID','total_amount','donation_count']
   }[tab]
 
+  const formatCell = (col, val) => {
+    if (val === null || val === undefined) return ''
+    const low = String(col).toLowerCase()
+    if (low.includes('amount') || low.includes('cost') || low.includes('donation') || low.includes('value')) {
+      return currency(val)
+    }
+    return val
+  }
+
   return (
     <div>
       <h2>Queries</h2>
@@ -39,7 +49,7 @@ export default function Queries(){
         <tbody>
           {rows.map((r, idx)=> (
             <tr key={idx}>
-              {columns.map(c=> <td key={c}>{r[c]}</td>)}
+              {columns.map(c=> <td key={c}>{formatCell(c, r[c])}</td>)}
             </tr>
           ))}
         </tbody>

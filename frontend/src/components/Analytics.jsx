@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend } from 'chart.js'
 import { Bar, Pie, Line } from 'react-chartjs-2'
+import { currency } from '../utils/format'
 
 // Register Chart.js components
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend)
@@ -15,6 +16,8 @@ export default function Analytics() {
   const [donors, setDonors] = useState([])
   const [donationsByType, setDonationsByType] = useState([])
   const [activeTab, setActiveTab] = useState('dashboard')
+
+  // currency() is imported from utils/format
 
   useEffect(() => {
     loadDashboard()
@@ -95,7 +98,7 @@ export default function Analytics() {
               <div style={{ color: '#666', fontSize: 14 }}>Total NGOs</div>
             </div>
             <div style={{ padding: 16, background: '#e7ffe7', borderRadius: 8 }}>
-              <div style={{ fontSize: 28, fontWeight: 'bold', color: '#0a6' }}>${(kpis.total_donations || 0).toLocaleString()}</div>
+              <div style={{ fontSize: 28, fontWeight: 'bold', color: '#0a6' }}>{currency(kpis.total_donations || 0)}</div>
               <div style={{ color: '#666', fontSize: 14 }}>Total Donations</div>
             </div>
             <div style={{ padding: 16, background: '#fff3e0', borderRadius: 8 }}>
@@ -239,20 +242,20 @@ export default function Analytics() {
               <Bar
                 data={{
                   labels: events.map(e => e.Event_Type),
-                  datasets: [
-                    {
-                      label: 'Donations Raised',
-                      data: events.map(e => e.donations_raised),
+                  datasets: [{
+                    label: 'Lifetime Value (₹)',
+                    data: donors.slice(0, 10).map(d => d.lifetime_value),
+                        data: events.map(e => e.donations_raised),
                       backgroundColor: '#0a6'
                     },
                     {
-                      label: 'Total Cost',
-                      data: events.map(e => e.total_cost),
+                      label: 'Total Cost (₹)',
+                        data: events.map(e => e.total_cost),
                       backgroundColor: '#d32f2f'
                     },
                     {
-                      label: 'Net Impact',
-                      data: events.map(e => e.net_impact),
+                      label: 'Net Impact (₹)',
+                        data: events.map(e => e.net_impact),
                       backgroundColor: '#00796b'
                     }
                   ]
@@ -285,10 +288,10 @@ export default function Analytics() {
                     <td>{e.Event_ID}</td>
                     <td>{e.Event_Type}</td>
                     <td>{e.Location}</td>
-                    <td>${e.total_cost?.toLocaleString()}</td>
-                    <td>${e.donations_raised?.toLocaleString()}</td>
+                    <td>{currency(e.total_cost)}</td>
+                    <td>{currency(e.donations_raised)}</td>
                     <td style={{ color: e.net_impact >= 0 ? '#0a6' : '#d32f2f', fontWeight: 'bold' }}>
-                      ${e.net_impact?.toLocaleString()}
+                      {currency(e.net_impact)}
                     </td>
                     <td>{e.volunteer_count}</td>
                     <td>{e.total_volunteer_hours}</td>
@@ -314,8 +317,8 @@ export default function Analytics() {
                   data={{
                     labels: vendors.map(v => v.vendor_name),
                     datasets: [{
-                      label: 'Total Revenue',
-                      data: vendors.map(v => v.total_revenue),
+                      label: 'Total Revenue (₹)',
+                        data: vendors.map(v => v.total_revenue),
                       backgroundColor: '#f57f17'
                     }]
                   }}
@@ -368,8 +371,8 @@ export default function Analytics() {
                     <td>{v.vendor_name}</td>
                     <td>{v.Service_type}</td>
                     <td>{v.events_served}</td>
-                    <td>${v.total_revenue?.toLocaleString()}</td>
-                    <td>${v.avg_cost_per_event?.toFixed(2)}</td>
+                    <td>{currency(v.total_revenue)}</td>
+                    <td>{currency(v.avg_cost_per_event)}</td>
                     <td>{v.first_contract}</td>
                     <td>{v.latest_contract}</td>
                   </tr>
@@ -449,7 +452,7 @@ export default function Analytics() {
                 data={{
                   labels: donors.slice(0, 10).map(d => d.donor_name),
                   datasets: [{
-                    label: 'Lifetime Value ($)',
+                    label: 'Lifetime Value',
                     data: donors.slice(0, 10).map(d => d.lifetime_value),
                     backgroundColor: '#f57c00'
                   }]
@@ -483,8 +486,8 @@ export default function Analytics() {
                     <td>{d.Donor_ID}</td>
                     <td>{d.donor_name}</td>
                     <td>{d.donation_count}</td>
-                    <td>${d.lifetime_value?.toLocaleString()}</td>
-                    <td>${d.avg_donation?.toFixed(2)}</td>
+                    <td>{currency(d.lifetime_value)}</td>
+                    <td>{currency(d.avg_donation)}</td>
                     <td>{d.first_donation}</td>
                     <td>{d.latest_donation}</td>
                     <td>{d.days_active}</td>
@@ -553,8 +556,8 @@ export default function Analytics() {
                   <tr key={idx}>
                     <td>{d.donation_type}</td>
                     <td>{d.donation_count}</td>
-                    <td>${d.total_amount?.toLocaleString()}</td>
-                    <td>${d.avg_amount?.toFixed(2)}</td>
+                    <td>{currency(d.total_amount)}</td>
+                    <td>{currency(d.avg_amount)}</td>
                   </tr>
                 ))}
               </tbody>

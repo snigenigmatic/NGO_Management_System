@@ -79,8 +79,7 @@ export default function Events(){
         <input placeholder='Vendors JSON (e.g., [{"Vendor_ID":1,"Cost":5000}])' value={form.vendors_json} onChange={set('vendors_json')} />
         <button type="submit" disabled={busy} style={{gridColumn:'span 3'}}>Create event</button>
         <div style={{gridColumn:'span 3', display:'flex', gap:8, alignItems:'center'}}>
-          <button type="button" onClick={fetchRecommendations} disabled={recBusy || !form.event_type} style={{padding:'6px 10px'}}>Get recommendations</button>
-          <div style={{color:'#666', fontSize:13}}>{recBusy ? 'Fetching recommendations…' : 'Click to fetch sponsor & vendor recommendations for this event'}</div>
+          <div style={{color:'#666', fontSize:13}}>{recBusy ? 'Fetching recommendations…' : 'Click an event in the table to fetch sponsor & vendor recommendations'}</div>
         </div>
       </form>
 

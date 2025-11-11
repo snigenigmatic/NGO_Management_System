@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { currency } from '../utils/format'
 
 export default function Audit(){
   const [rows, setRows] = useState([])
@@ -20,8 +21,8 @@ export default function Audit(){
               <td>{r.donation_id}</td>
               <td>{r.changed_at}</td>
               <td>{r.action}</td>
-              <td>{r.old_amount}</td>
-              <td>{r.new_amount}</td>
+              <td>{currency(r.old_amount)}</td>
+              <td>{currency(r.new_amount)}</td>
               <td>{r.note}</td>
             </tr>
           ))}

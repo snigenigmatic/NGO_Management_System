@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import axios from 'axios'
+import { currency } from '../utils/format'
 
 export default function Donations(){
   const [rows, setRows] = useState([])
@@ -20,7 +21,7 @@ export default function Donations(){
               <td>{r.Donation_ID}</td>
               <td>{r.Receipt_Number}</td>
               <td>{r.Donation_date}</td>
-              <td>{r.Amount}</td>
+              <td>{currency(r.Amount)}</td>
               <td>{r.Type}</td>
             </tr>
           ))}
