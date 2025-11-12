@@ -46,6 +46,8 @@ input[type="text"], input[type="date"], input[type="number"], textarea{
 	padding:8px 10px; border:1px solid var(--border); border-radius:6px; width:100%;
 }
 form button{background:var(--accent); color:white; border:none; padding:10px 14px; border-radius:6px}
+/* Ensure form submit buttons keep accent on hover (override generic button hover) */
+form button:hover{background:linear-gradient(180deg,var(--accent),var(--accent-600)); color:white}
 
 /* responsive tweaks */
 @media (max-width:720px){

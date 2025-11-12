@@ -171,19 +171,45 @@ def recommend_vendors(q: str):
 @app.get("/events")
 def list_events():
     return fetchall(
-        """SELECT e.Event_ID, e.Event_Type, e.Location, e.Venue_ID, 
-           v.Status AS venue_status, n.NGO_Name, n.Type AS ngo_type
-           FROM Event e 
-           LEFT JOIN Venue v ON e.Venue_ID = v.Venue_ID 
+        """SELECT e.Event_ID,
+           e.Event_Type,
+           e.Location,
+           e.Venue_ID,
+           n.NGO_Name,
+           n.Type AS ngo_type,
+           COALESCE(evc.total_cost, 0) AS total_cost,
+           GROUP_CONCAT(DISTINCT v.Name ORDER BY v.Name SEPARATOR ', ') AS vendor_names,
+           sp.Name AS sponsor_name
+           FROM Event e
+           LEFT JOIN Venue vn ON e.Venue_ID = vn.Venue_ID
            LEFT JOIN NGO n ON e.NGO_ID = n.NGO_ID
+           LEFT JOIN (
+             SELECT Event_ID, SUM(Cost) AS total_cost
+             FROM Event_Vendor
+             GROUP BY Event_ID
+           ) evc ON e.Event_ID = evc.Event_ID
+           LEFT JOIN Event_Vendor ev ON e.Event_ID = ev.Event_ID
+           LEFT JOIN Vendor v ON ev.Vendor_ID = v.Vendor_ID
+           LEFT JOIN Sponsor_Person sp ON e.Sponsor_Person_ID = sp.Sponsor_Person_ID
+           GROUP BY e.Event_ID, e.Event_Type, e.Location, e.Venue_ID, n.NGO_Name, n.Type, evc.total_cost, sp.Name
            ORDER BY e.Event_ID DESC"""
     )
 
 
 @app.post("/events")
 def create_event(payload: dict):
-    # payload should include event_type, start_date, end_date, location, ngo_id, venue_id, vendors_json
+    # payload should include event_type, start_date, end_date, location, ngo_id, venue_id, vendor_id, vendor_cost
     try:
+        # Build vendors JSON in the correct format expected by the stored procedure
+        vendors_json = None
+        if payload.get("vendor_id") and payload.get("vendor_cost") is not None:
+            import json
+            vendors_json = json.dumps([{
+                "vendor_id": payload.get("vendor_id"),
+                "cost": payload.get("vendor_cost"),
+                "details": ""
+            }])
+        
         callproc(
             "create_event_and_book_venue",
             [
@@ -193,7 +219,7 @@ def create_event(payload: dict):
                 payload.get("location"),
                 payload.get("ngo_id"),
                 payload.get("venue_id"),
-                payload.get("vendors_json"),
+                vendors_json,
             ],
         )
         return {"status": "ok"}

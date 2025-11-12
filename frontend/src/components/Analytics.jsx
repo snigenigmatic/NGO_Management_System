@@ -15,6 +15,7 @@ export default function Analytics() {
   const [volunteers, setVolunteers] = useState([])
   const [donors, setDonors] = useState([])
   const [donationsByType, setDonationsByType] = useState([])
+  const [ngoSummary, setNgoSummary] = useState([])
   const [activeTab, setActiveTab] = useState('dashboard')
 
   // currency() is imported from utils/format
@@ -53,8 +54,15 @@ export default function Analytics() {
     axios.get('http://127.0.0.1:8000/analytics/donations/by-type').then(r => setDonationsByType(r.data || []))
   }
 
+  const loadNgoSummary = () => {
+    axios.get('http://127.0.0.1:8000/summary/ngo').then(r => {
+      setNgoSummary(r.data.view || [])
+    })
+  }
+
   const switchTab = (tab) => {
     setActiveTab(tab)
+    if (tab === 'ngos' && ngoSummary.length === 0) loadNgoSummary()
     if (tab === 'sponsors' && sponsors.length === 0) loadSponsors()
     if (tab === 'events' && events.length === 0) loadEvents()
     if (tab === 'vendors' && vendors.length === 0) loadVendors()
@@ -69,7 +77,7 @@ export default function Analytics() {
 
       {/* Tab navigation */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, borderBottom: '2px solid #ddd', paddingBottom: 8 }}>
-        {['dashboard', 'sponsors', 'events', 'vendors', 'volunteers', 'donors', 'donations'].map(tab => (
+        {['dashboard', 'ngos', 'sponsors', 'events', 'vendors', 'volunteers', 'donors', 'donations'].map(tab => (
           <button
             key={tab}
             onClick={() => switchTab(tab)}
@@ -170,6 +178,77 @@ export default function Analytics() {
                 }}
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* NGO Performance */}
+      {activeTab === 'ngos' && (
+        <div>
+          <h3>NGO Performance & Donations</h3>
+          
+          {/* Charts */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 30 }}>
+            <div style={{ background: '#fff', padding: 20, borderRadius: 8, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+              <h4>Total Donations by NGO (₹)</h4>
+              <Bar
+                data={{
+                  labels: ngoSummary.map(n => n.NGO_Name),
+                  datasets: [{
+                    label: 'Total Donations (₹)',
+                    data: ngoSummary.map(n => n.total_donations),
+                    backgroundColor: '#0056b3'
+                  }]
+                }}
+                options={{
+                  responsive: true,
+                  plugins: { legend: { display: false } },
+                  scales: { y: { beginAtZero: true } }
+                }}
+              />
+            </div>
+            <div style={{ background: '#fff', padding: 20, borderRadius: 8, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+              <h4>Donor Count by NGO</h4>
+              <Bar
+                data={{
+                  labels: ngoSummary.map(n => n.NGO_Name),
+                  datasets: [{
+                    label: 'Number of Donors',
+                    data: ngoSummary.map(n => n.donor_count),
+                    backgroundColor: '#0a6'
+                  }]
+                }}
+                options={{
+                  responsive: true,
+                  plugins: { legend: { display: false } },
+                  scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>NGO ID</th>
+                  <th>NGO Name</th>
+                  <th>Total Donations</th>
+                  <th>Donor Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ngoSummary.map(r => (
+                  <tr key={r.NGO_ID}>
+                    <td>{r.NGO_ID}</td>
+                    <td>{r.NGO_Name}</td>
+                    <td>{currency(r.total_donations)}</td>
+                    <td>{r.donor_count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
