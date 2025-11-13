@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { currency } from '../utils/format'
 
 export default function Summary(){
   const [view, setView] = useState([])
@@ -22,7 +23,7 @@ export default function Summary(){
             <tr key={r.NGO_ID}>
               <td>{r.NGO_ID}</td>
               <td>{r.NGO_Name}</td>
-              <td>{r.total_donations}</td>
+              <td>{currency(r.total_donations)}</td>
               <td>{r.donor_count}</td>
             </tr>
           ))}
@@ -39,7 +40,7 @@ export default function Summary(){
             <tr key={r.NGO_ID}>
               <td>{r.NGO_ID}</td>
               <td>{r.NGO_Name}</td>
-              <td>{r.total_donations}</td>
+              <td>{currency(r.total_donations)}</td>
             </tr>
           ))}
         </tbody>

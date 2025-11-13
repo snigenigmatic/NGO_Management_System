@@ -8,3 +8,7 @@ dist/
 build/
 package-lock.json
 .vscode/
+
+sql/check_duplicate_vendors.sql
+sql/check_event_vendor_sponsor.sql
+sql/diagnose_cost_mismatch.sql
